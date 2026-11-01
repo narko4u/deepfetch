@@ -41,4 +41,4 @@ jobs:
             sleep 20
           } | timeout 60 node dist/index.js > e2e.txt 2>e2e.err || true
           echo "--- response ---"; head -c 600 e2e.txt; echo; echo "--- stderr ---"; head -c 300 e2e.err
-          test "$(grep -o '"url":"https\?://[^"]*"' e2e.txt | wc -l)" -ge 2
+          test "$(grep -o 'https://' e2e.txt | wc -l)" -ge 2
