@@ -2,52 +2,91 @@
 
 [![build](https://github.com/narko4u/deepfetch/actions/workflows/build.yml/badge.svg)](https://github.com/narko4u/deepfetch/actions/workflows/build.yml)
 
-High-quality web research, clean scraping, site crawling, and structured data extraction for **Grok Build**.
+Web research for **Grok Build**: search, clean scraping, site crawling and structured extraction, exposed as four MCP tools.
 
-## Features (v0.1)
+No vendor account. No API key required. Search fans out across public endpoints and merges whatever answers. Scraping and crawling run in process with zero runtime dependencies beyond Node globals.
 
-| Tool | Description |
-|------|-------------|
-| `deepfetch_search` | Web search with ranking & freshness |
-| `deepfetch_scrape` | Clean markdown / text from any URL |
-| `deepfetch_crawl` | Crawl a site or section with limits |
-| `deepfetch_extract` | Structured extraction via natural language instructions |
+## Tools
 
-## Status: v0.1.0, backend not implemented
+| Tool | What it does |
+|------|--------------|
+| `deepfetch_search` | Web search with ranking and freshness, merged across several public sources |
+| `deepfetch_scrape` | Clean markdown or plain text from a single URL |
+| `deepfetch_crawl` | Same-site crawl with page, depth and path limits, robots.txt honoured |
+| `deepfetch_extract` | Structured data from a URL or supplied text, by natural language instruction |
 
-This release ships the plugin shell, the MCP server, the tool schemas and the skills. The
-transport layer in `mcp-server/src/lib/client.ts` is still a stub: every tool returns a
-placeholder response. Nothing here searches, scrapes, crawls or extracts yet.
+### `deepfetch_search`
 
-What works today: the server builds on CI, starts, lists its four tools and validates their
-arguments. What does not: the actual fetching. Wire `client.ts` to a real backend before
-listing this anywhere as a working tool.
+```json
+{ "query": "Binance hack North Korea", "num_results": 8, "freshness": "week" }
+```
+
+Returns `{ results: [ { title, url, snippet, published, source } ] }`. Sources currently include DuckDuckGo, Google News, Hacker News and Wikipedia. Results are deduplicated by URL and title, then ranked by term overlap in title and snippet, with a bonus for results inside the freshness window.
+
+### `deepfetch_scrape`
+
+```json
+{ "url": "https://example.com/article", "format": "markdown", "include_links": true }
+```
+
+Returns `{ url, title, markdown, links, jsonLd, truncated }`. Content selection prefers `<article>` or `<main>` when it carries most of the page text, strips scripts, styles, navigation, footers and forms, then converts headings, lists, tables, code blocks, links and images to markdown.
+
+### `deepfetch_crawl`
+
+```json
+{ "url": "https://docs.example.com", "max_pages": 10, "max_depth": 2, "include_paths": ["/docs"] }
+```
+
+Same-host only, follows the post-redirect host, skips assets and duplicate paths, and stops on robots.txt disallow. Caps: 25 pages, depth 3.
+
+### `deepfetch_extract`
+
+```json
+{ "url": "https://example.com/product", "instruction": "price, availability and shipping cost" }
+```
+
+Two modes:
+
+- **Heuristic** (default, no key): returns the page title, any JSON-LD blocks and verbatim sentences ranked by keyword overlap. Honest about what it is, never invents a value.
+- **Model** (set `DEEPFETCH_LLM_API_KEY`): sends the instruction and page text to any OpenAI-compatible chat endpoint and returns parsed JSON.
 
 ## Install in Grok Build
 
 ```bash
-# Add the marketplace (once)
 grok plugin marketplace add narko4u/deepfetch
-
-# Install the plugin
 grok plugin install deepfetch --trust
 ```
 
-Or from inside a Grok Build session:
+Or from inside a Grok Build session use `/marketplace`.
 
-```
-/marketplace
+The MCP server is registered by `.mcp.json` and speaks stdio. Any MCP client can run it:
+
+```bash
+cd mcp-server && npm install && npm run build && node dist/index.js
 ```
 
 ## Configuration
 
-Set your API key (required for paid / higher limits):
+All optional. Nothing is required to run.
 
-```bash
-export DEEPFETCH_API_KEY="your-key-here"
-```
+| Variable | Default | Purpose |
+|---|---|---|
+| `DEEPFETCH_TIMEOUT_MS` | `20000` | Per-request timeout |
+| `DEEPFETCH_MAX_BYTES` | `3000000` | Response size cap before parsing |
+| `DEEPFETCH_USER_AGENT` | `DeepFetch/0.2.0 (+repo url)` | Identify yourself differently if you run this at scale |
+| `DEEPFETCH_DUALSTACK` | unset | Set to `1` to keep Node dual-stack connect behaviour. By default IPv4 is forced, which fixes connect timeouts on networks with a broken IPv6 route |
+| `DEEPFETCH_LLM_API_KEY` | unset | Enables model-backed `deepfetch_extract` |
+| `DEEPFETCH_LLM_BASE_URL` | `https://api.deepseek.com/v1` | Any OpenAI-compatible base URL |
+| `DEEPFETCH_LLM_MODEL` | `deepseek-chat` | Model name for extraction |
 
-You can also put it in `~/.grok/config.toml` or pass it via the environment when starting Grok.
+## Behaviour and limits
+
+- **Robots**: the crawler reads robots.txt per origin, honours `Disallow` for `*` and for `DeepFetch`, and applies longest-match with `Allow` winning ties.
+- **SSRF guard**: every request is parsed and rejected if it targets loopback, link-local, private ranges, `.internal` or `.local`. This is a fetch tool, not a proxy into your network.
+- **Politeness**: crawl batches three requests at a time with a short gap, and only follows same-host links.
+- **No JavaScript**: pages that render entirely client-side will come back thin. Add a headless browser if you need that.
+- **No PDFs or binary documents**: HTML, JSON and plain text only, with a clear error otherwise.
+- **Public sources move**: if one search backend starts refusing traffic the others still answer, but result mix will change. That is a feature of being keyless, not a bug.
 
 ## Development
 
@@ -55,15 +94,17 @@ You can also put it in `~/.grok/config.toml` or pass it via the environment when
 cd mcp-server
 npm install
 npm run build
-npm run dev          # watch mode
+npm run dev     # watch mode
 ```
+
+CI runs `npm install`, `tsc`, asserts `dist/index.js` exists, then starts the server and requires all four tools over stdio.
 
 ## Skills
 
-- **deep-research** – Multi-step research workflow
-- **scrape-page** – Single page clean extraction
-- **extract-data** – Structured field extraction
+- **deep-research**: multi-step research workflow
+- **scrape-page**: single page clean extraction
+- **extract-data**: structured field extraction
 
-## License
+## Licence
 
-MIT
+MIT. Copyright (c) 2026 Security Division, Empire Labs Pty Ltd.

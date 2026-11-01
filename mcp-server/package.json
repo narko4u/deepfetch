@@ -1,7 +1,7 @@
 {
   "name": "deepfetch-mcp",
-  "version": "0.1.0",
-  "description": "MCP server for DeepFetch – web research, scraping, crawling, and structured extraction",
+  "version": "0.2.0",
+  "description": "MCP server for DeepFetch \u2013 web research, scraping, crawling, and structured extraction",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
