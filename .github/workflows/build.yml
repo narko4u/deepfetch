@@ -33,10 +33,12 @@ jobs:
           test "$(grep -o '"name":"deepfetch_[a-z]*"' smoke.txt | sort -u | wc -l)" -eq 4
       - name: End-to-end search call over stdio
         run: |
-          printf '%s\n' \
-            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"0"}}}' \
-            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
-            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"deepfetch_search","arguments":{"query":"SQLite WAL mode checkpoint","num_results":5}}}' \
-            | timeout 60 node dist/index.js > e2e.txt || true
-          grep -o '"url":"https\?://[^"]*"' e2e.txt | head -3
+          {
+            printf '%s\n' \
+              '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"0"}}}' \
+              '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+              '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"deepfetch_search","arguments":{"query":"SQLite WAL mode checkpoint","num_results":5}}}'
+            sleep 20
+          } | timeout 60 node dist/index.js > e2e.txt 2>e2e.err || true
+          echo "--- response ---"; head -c 600 e2e.txt; echo; echo "--- stderr ---"; head -c 300 e2e.err
           test "$(grep -o '"url":"https\?://[^"]*"' e2e.txt | wc -l)" -ge 2
