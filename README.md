@@ -1,5 +1,7 @@
 # DeepFetch
 
+[![build](https://github.com/narko4u/deepfetch/actions/workflows/build.yml/badge.svg)](https://github.com/narko4u/deepfetch/actions/workflows/build.yml)
+
 High-quality web research, clean scraping, site crawling, and structured data extraction for **Grok Build**.
 
 ## Features (v0.1)
@@ -17,7 +19,7 @@ This release ships the plugin shell, the MCP server, the tool schemas and the sk
 transport layer in `mcp-server/src/lib/client.ts` is still a stub: every tool returns a
 placeholder response. Nothing here searches, scrapes, crawls or extracts yet.
 
-What works today: the server builds, starts, lists its four tools and validates their
+What works today: the server builds on CI, starts, lists its four tools and validates their
 arguments. What does not: the actual fetching. Wire `client.ts` to a real backend before
 listing this anywhere as a working tool.
 
