@@ -1,0 +1,22 @@
+{
+  "name": "deepfetch",
+  "version": "0.1.0",
+  "description": "High-quality web research, clean scraping, site crawling, and structured data extraction for Grok Build.",
+  "author": {
+    "name": "Security Division, Empire Labs Pty Ltd",
+    "url": "https://www.empirelabs.com.au"
+  },
+  "homepage": "https://github.com/narko4u/deepfetch",
+  "repository": "https://github.com/narko4u/deepfetch",
+  "license": "MIT",
+  "keywords": [
+    "web research",
+    "scrape",
+    "crawl",
+    "extract",
+    "deep research",
+    "web data",
+    "firecrawl alternative"
+  ],
+  "category": "development"
+}
