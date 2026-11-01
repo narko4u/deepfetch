@@ -15,10 +15,19 @@ jobs:
       run:
         working-directory: mcp-server
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm run build
       - run: test -f dist/index.js
+      - name: Smoke test - server starts and lists four tools
+        run: |
+          printf '%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"0"}}}' \
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+            | timeout 25 node dist/index.js > smoke.txt || true
+          grep -o '"name":"deepfetch_[a-z]*"' smoke.txt | sort -u
+          test "$(grep -o '"name":"deepfetch_[a-z]*"' smoke.txt | sort -u | wc -l)" -eq 4
