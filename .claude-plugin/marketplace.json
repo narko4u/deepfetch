@@ -1,0 +1,19 @@
+{
+  "name": "empire-labs",
+  "description": "Plugins from Empire Labs: web research and evidence tooling for agent runtimes.",
+  "owner": {
+    "name": "Security Division, Empire Labs Pty Ltd",
+    "email": "contact@empirelabs.com.au"
+  },
+  "plugins": [
+    {
+      "name": "deepfetch",
+      "source": "./",
+      "description": "Web search, clean scraping, site crawling and structured extraction as four MCP tools. Keyless.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Security Division, Empire Labs Pty Ltd"
+      }
+    }
+  ]
+}

@@ -50,20 +50,30 @@ Two modes:
 - **Heuristic** (default, no key): returns the page title, any JSON-LD blocks and verbatim sentences ranked by keyword overlap. Honest about what it is, never invents a value.
 - **Model** (set `DEEPFETCH_LLM_API_KEY`): sends the instruction and page text to any OpenAI-compatible chat endpoint and returns parsed JSON.
 
-## Install in Grok Build
+## Install
+
+Grok Build loads plugins from `~/.grok/plugins/`, a project `.grok/plugins/` directory, an installed marketplace, or any path given with `--plugin-dir`.
 
 ```bash
-grok plugin marketplace add narko4u/deepfetch
-grok plugin install deepfetch --trust
+git clone https://github.com/narko4u/deepfetch
+cd deepfetch/mcp-server
+npm install
+npm run build
 ```
 
-Or from inside a Grok Build session use `/marketplace`.
+Then pick one:
 
-The MCP server is registered by `.mcp.json` and speaks stdio. Any MCP client can run it:
+- copy or symlink the repo into `~/.grok/plugins/deepfetch` and enable it from `/plugins`
+- or launch Grok Build with `--plugin-dir /path/to/deepfetch`
+- or add this repo as a marketplace source and install from `/marketplace`
+
+The server is declared in `.mcp.json`, so Claude Code compatible clients pick it up as well. To run it on its own:
 
 ```bash
-cd mcp-server && npm install && npm run build && node dist/index.js
+node mcp-server/dist/index.js
 ```
+
+The repo also carries `.claude-plugin/marketplace.json` in the Claude Code marketplace format, which Grok Build reads.
 
 ## Configuration
 
