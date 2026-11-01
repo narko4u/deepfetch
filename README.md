@@ -115,6 +115,12 @@ CI runs `npm install`, `tsc`, asserts `dist/index.js` exists, then starts the se
 - **scrape-page**: single page clean extraction
 - **extract-data**: structured field extraction
 
-## Licence
+## Licence and price
 
-MIT. Copyright (c) 2026 Security Division, Empire Labs Pty Ltd.
+The code is MIT. Use it, fork it, ship it in commercial work, no permission needed. Copyright (c) 2026 Security Division, Empire Labs Pty Ltd.
+
+If your organisation needs a licence certificate for procurement, or you want priority email support, there is a **commercial licence for USD $2, charged once**:
+
+**https://buy.stripe.com/8x200j5Brd4BcBW2Ef2oE02**
+
+What the USD $2 buys: a licence certificate naming your organisation, priority responses at contact@empirelabs.com.au and a record that supports internal approval. It does not take away any MIT right, and it is not a subscription.
