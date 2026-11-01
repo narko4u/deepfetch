@@ -50,6 +50,33 @@ Two modes:
 - **Heuristic** (default, no key): returns the page title, any JSON-LD blocks and verbatim sentences ranked by keyword overlap. Honest about what it is, never invents a value.
 - **Model** (set `DEEPFETCH_LLM_API_KEY`): sends the instruction and page text to any OpenAI-compatible chat endpoint and returns parsed JSON.
 
+## Hosted search, USD $19/month
+
+Local mode searches from your own machine and the engines rate-limit heavy use. Hosted mode sends the same queries through Empire Labs' endpoint, so the limits are ours to manage.
+
+- Endpoint: `https://search.empirelabs.com.au`
+- 1,000 searches per day per key
+- **USD $19 per month, cancel anytime: https://buy.stripe.com/fZufZh5Br2pX0Te92D2oE03**
+- Keys are issued by email after payment, usually within one business day
+
+Point the plugin at it with two environment variables:
+
+```bash
+export DEEPFETCH_API_KEY=dfk_...
+export DEEPFETCH_API_URL=https://search.empirelabs.com.au
+```
+
+Or call it directly:
+
+```bash
+curl -s https://search.empirelabs.com.au/search \
+  -H "Authorization: Bearer $DEEPFETCH_API_KEY" \
+  -H "content-type: application/json" \
+  -d '{"query":"australia ai regulation","numResults":8}'
+```
+
+Response: `{"query","count","results":[{"title","url","snippet","source"}],"used","quota","ms"}`. `GET /me` returns the plan and today's usage, `GET /health` is unauthenticated.
+
 ## Install
 
 Grok Build loads plugins from `~/.grok/plugins/`, a project `.grok/plugins/` directory, an installed marketplace, or any path given with `--plugin-dir`.

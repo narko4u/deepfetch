@@ -721,6 +721,30 @@ export async function search(
   const limit = Math.min(Math.max(options.numResults ?? 8, 1), 20);
   const windowDays = freshnessDays(options.freshness);
 
+  // Optional hosted tier: set DEEPFETCH_API_KEY to route search through Empire
+  // Labs' endpoint (no per-host rate limits). Falls back to direct fan-out.
+  const hostedKey = process.env.DEEPFETCH_API_KEY;
+  if (hostedKey) {
+    const base = (process.env.DEEPFETCH_API_URL || "https://search.empirelabs.com.au").replace(/\/$/, "");
+    const resp = await fetch(`${base}/search`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${hostedKey}` },
+      body: JSON.stringify({ query: trimmed, numResults: limit, freshness: options.freshness || "" }),
+      signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
+    });
+    if (!resp.ok) {
+      const detail = await resp.text().catch(() => "");
+      throw new Error(`Hosted search failed (${resp.status}): ${detail.slice(0, 200)}`);
+    }
+    const payload = (await resp.json()) as { results?: SearchResult[] };
+    return (payload.results || []).slice(0, limit).map((hit) => ({
+      title: hit.title,
+      url: hit.url,
+      snippet: hit.snippet || "",
+      source: hit.source || "hosted",
+    }));
+  }
+
   const settled = await Promise.allSettled([
     searchDuckDuckGo(trimmed, limit),
     searchGoogleNews(trimmed, limit, options.freshness),
